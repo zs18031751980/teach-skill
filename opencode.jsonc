@@ -1,0 +1,11 @@
+{
+  // 知识详细讲解 Skill 配置
+  "$schema": "https://opencode.ai/schemas/opencode.json",
+  "skills": [
+    {
+      "name": "zs-teach-skill",
+      "description": "知识详细讲解 — 覆盖正确性、全面性、举例、比喻、原理/流程/应用、不遗漏、高质量 7 条要求",
+      "file": ".opencode/skills/zs-teach-skill/SKILL.md"
+    }
+  ]
+}
