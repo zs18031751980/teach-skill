@@ -1,3 +1,8 @@
+---
+name: zs-teach-skill
+description: 知识详细讲解 — 系统性讲解任意知识主题，覆盖正确性、全面性、举例、比喻、原理/流程/应用、不遗漏、高质量 7 条要求
+---
+
 # Skill: zs-teach-skill — 知识详细讲解
 
 ## 设计定位
