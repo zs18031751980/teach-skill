@@ -476,6 +476,8 @@ description: 知识详细讲解 — 系统性讲解任意知识主题 + PDF/Word
 │   ├── .pdf → PDF 处理            │
 │   ├── .docx → Word 处理          │
 │   ├── .doc → 提示用户转换为 docx  │
+│   ├── .pptx → PPT 处理           │
+│   ├── .ppt → 提示用户转换为 pptx  │
 │   └── 其他格式 → 告知用户不支持   │
 └──────────┬───────────────────────┘
            ▼
@@ -560,6 +562,38 @@ description: 知识详细讲解 — 系统性讲解任意知识主题 + PDF/Word
 
 **不支持直接读取**。告知用户：
 > ".doc 格式（Word 97-2003）无法直接提取文本。请用 Word 打开后另存为 .docx 格式，或将内容复制到新文档中保存为 .docx。"
+
+#### PPT 文件（.pptx）
+
+| 场景 | 工具/方法 | 命令 |
+|------|----------|------|
+| **文本提取（全部幻灯片）** | Python `python-pptx` | `python -c "import pptx; prs=pptx.Presentation('文件.pptx'); print('\n'.join(['--- 幻灯片 '+str(i+1)+' ---\n'+''.join([p.text for p in slide.shapes if hasattr(p, 'text')]) for i, slide in enumerate(prs.slides)]))"` |
+| **逐张幻灯片保留结构** | Python `python-pptx` 分幻灯片输出 | `python -c "import pptx; prs=pptx.Presentation('文件.pptx'); [print(f'--- 幻灯片 {i+1} ---\n标题: {slide.shapes.title.text if slide.shapes.title else \"(无标题)\"}') for i, slide in enumerate(prs.slides)]"` |
+| **表格提取** | `python-pptx` 表格遍历 | `python -c "import pptx; prs=pptx.Presentation('文件.pptx'); [print('|'+'|'.join([c.text for c in r.cells])+'|') for slide in prs.slides for shape in slide.shapes if shape.has_table for r in shape.table.rows]"` |
+| **幻灯片备注提取** | `python-pptx` notes_slide | `python -c "import pptx; prs=pptx.Presentation('文件.pptx'); [print(f'幻灯片 {i+1} 备注: {slide.notes_slide.notes_text_frame.text}' if slide.has_notes_slide else '') for i, slide in enumerate(prs.slides)]"` |
+
+**提取顺序**：幻灯片标题 → 正文文本框 → 表格 → 备注。每张幻灯片以 `--- 幻灯片 N ---` 分隔，并保留幻灯片编号。
+
+**注意事项**：
+- `python-pptx` 提取的是文本框中的纯文本，不包含图片中的文字
+- 图形/图表/SmartArt 中的文字可能无法提取（`python-pptx` 仅提取 `shape.has_text_frame` 的文本框）
+- 提取后的文本默认为无格式纯文本（加粗/斜体/颜色丢失），此为 PPT 提取固有局限
+
+#### .ppt 文件（旧版 PowerPoint）
+
+**不支持直接读取**。告知用户：
+> ".ppt 格式（PowerPoint 97-2003）无法直接提取文本。请用 PowerPoint 打开后另存为 .pptx 格式。"
+
+#### 文件类型处理流程汇总
+
+| 文件类型 | 扩展名 | 支持状态 | 处理工具 |
+|---------|--------|---------|---------|
+| PDF（文本型） | .pdf | ✅ 支持 | `read` + `PyMuPDF` / `pdfplumber` |
+| PDF（扫描型） | .pdf | ⚠️ 仅告知 | 需 OCR 预处理 |
+| Word 文档 | .docx | ✅ 支持 | `python-docx` |
+| Word 旧版 | .doc | ❌ 不支持 | 提示转 .docx |
+| PowerPoint | .pptx | ✅ 支持 | `python-pptx` |
+| PowerPoint 旧版 | .ppt | ❌ 不支持 | 提示转 .pptx |
 
 ### 输出质量核验清单（步骤 7 专用）
 
@@ -813,11 +847,11 @@ description: 知识详细讲解 — 系统性讲解任意知识主题 + PDF/Word
 
 - [ ] 文件类型已检测并确认支持处理
 - [ ] 概括级别已确认（用户指定或默认为 L2）
-- [ ] 全文已提取（含全部段落/表格/列表/代码块/公式）
+- [ ] 全文已提取（含全部段落/表格/列表/代码块/公式；PPT 含全部幻灯片文本+备注）
 - [ ] 原文已按句拆分并编号（S001-Snnn）
 - [ ] 逐句覆盖率 = 100%（原文每一句都在输出中有对应）
 - [ ] 概括整合在同一级别内保持一致
-- [ ] 结构已正确映射（原文标题层级→markdown 标题层级）
+- [ ] 结构已正确映射（PDF/Word 原文标题层级→markdown 标题层级；PPT 幻灯片顺序→`--- 幻灯片 N ---` 分隔+标题层级）
 - [ ] 表格已逐格转换为 markdown 表格
 - [ ] 代码块已保留并标注语言
 - [ ] **4 类质量核验已全部执行并全部通过：**
