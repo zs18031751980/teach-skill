@@ -4,7 +4,7 @@
 
 ## 复杂度
 
-哈希表通过哈希定位候选位置，并处理冲突，不能类比成“总能一步直接找到”。在键的哈希和比较代价可视为常数、碰撞通常较少等条件下，CPython 字典查询平均 O(1)，最坏 O(n)。插入还需区别扩容带来的摊还成本；长字符串或自定义键的哈希、比较成本不能无条件忽略。[Python Wiki 的 CPython 复杂度说明](https://wiki.python.org/moin/TimeComplexity)
+哈希表通过哈希定位候选位置，并处理冲突，不能类比成“总能一步直接找到”。在键的哈希和比较代价可视为常数、碰撞通常较少等条件下，CPython 字典查询平均 O(1)，最坏 O(n)。插入还需区别扩容带来的摊还成本；长字符串或自定义键的哈希、比较成本不能无条件忽略。[Python Wiki 的 CPython 复杂度说明（已归档，具体实现仍需核对目标版本）](https://wiki.python.org/moin/TimeComplexity)
 
 两数之和使用字典保存已访问值的下标时，通常给平均 O(n) 时间、O(n) 额外空间；不能写成无条件最坏 O(n)。先查询补数再插入当前元素可避免复用当前下标；重复值是否允许取决于题目条件。
 
@@ -21,6 +21,8 @@
 | 消息队列 | 寄件、暂存、取件可以对应发送、排队、消费 | 不声称现实快递没有路由或优先级；解释具体消息系统的重试、确认、顺序和去重语义，不从比喻推出可靠性保证 |
 
 Docker 的镜像只读层和容器可写层也不能混为一谈，见[存储驱动说明](https://docs.docker.com/engine/storage/drivers/)及[多平台容器与内核关系](https://docs.docker.com/build/building/multi-platform/)。例如 Amazon SQS 标准队列提供至少一次投递与尽力维持顺序，可能重复或乱序；这不能推广成所有消息队列的共同语义。[SQS 标准队列文档](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/standard-queues.html)
+
+涉及 Docker 存储命令时先区分经典存储驱动与 containerd image store；上述存储驱动页面的命令不覆盖所有安装方式，层概念相通不代表操作命令可以通用。
 
 ## 自然表达与保真
 
