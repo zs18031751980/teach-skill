@@ -1,38 +1,37 @@
-# teach-skill — 知识详细讲解
+# teach-skill
 
-三平台兼容 Skill，用于系统性讲解任意知识主题。
+按问题范围讲解知识：具体疑点直接讲透，系统学习再组织完整原理、流程和应用。支持逐行代码解释、算法题及文件概括；检查在内部完成，学习输出不附带核验报告。
 
-## 平台接入方式
+## 维护结构
 
-| 平台 | 接入文件 | 作用 |
-|------|---------|------|
-| **Opencode** | `.opencode/skills/zs-teach-skill/SKILL.md` | Opencode 原生 skill，通过 `skill zs-teach-skill` 或在对话中匹配触发 |
-| **Cursor** | `.cursor/rules/zs-teach-skill.mdc` | Cursor Rules，自动应用到所有文件（alwaysApply: true），讲解知识时自动生效 |
-| **Codex** | `.github/copilot-instructions.md` | GitHub Copilot Codex 指令，讲解知识时自动遵循 |
+- `SKILL.md`：唯一维护的共同规则与模式路由。
+- `references/`：知识讲解、文件概括、代码解释、算法讲解及示例边界，按需读取。
+- `scripts/sync_entries.py`：从上述源文件生成平台入口，不单独维护入口里的规则。
+- `tests/`：同步脚本测试与实际试讲材料；不随教学模式加载。
+- `teach-skill.md`：历史入口指向主文件，不再保存另一套规则。
 
-## 7 条核心要求
+## 平台入口
 
-1. 讲解无错误及逻辑问题
-2. 详细全面，清楚易懂
-3. 难懂处举例说明
-4. 工具/组件做比喻
-5. 包含实现原理、工作流程、如何应用
-6. 每个要求到达，不遗漏任何一句
-7. 高质量落实，不减轻任务量
+| 入口 | 生成方式与使用范围 |
+|------|--------------------|
+| `.opencode/skills/zs-teach-skill/` | 生成主文件及参考副本，整个目录可作为独立 skill 包使用 |
+| `.cursor/rules/zs-teach-skill.mdc` | 生成共同规则，引用仓库根目录参考；保留原有 `alwaysApply: true` 设置，具体参考仅在讲解任务命中时读取 |
+| `.github/copilot-instructions.md` | 生成仓库指令并引用根目录参考；这是 Copilot 指令入口，不将它视作 Codex 原生 skill 安装目录 |
 
-## 使用方法
+供 Codex 等支持标准 skill 目录的环境使用时，将根目录 `SKILL.md` 与 `references/` 一起作为 `zs-teach-skill` 包安装；仓库内重构不会自动更新其他位置已经安装的副本。
 
-在任意支持平台中提出讲解请求即可，句式如：
-- "请讲解 XXX"
-- "解释一下 XXX"
-- "介绍一下 XXX"
-- "帮我理解 XXX"
-- "什么是 XXX"
+不要手改三个生成入口；Cursor 和 Copilot 入口需要连同根目录 `references/` 使用，不能只复制单个文件。
 
-AI 将自动执行完整教学流程：自然开场 → 结构化讲解（含例子/比喻/原理/流程/应用） → 内部核验与一次保真表达检查 → 完整交付（分步教学时按反馈推进）。
+## 同步与验证
 
-自然表达规则已同步到三个平台入口：使用具体对象和动作、按真实关系衔接、保持术语一致、保留必要限定，避免机械开场和重复总结。规则改编自 `../write/X-math-paper-deai/X-math-paper-deai/SKILL.md` 及其 `references/xjl_modeling-editing.md`，已内嵌，无需依赖该目录。原有内容覆盖、逐句整合和逐行代码解释要求保留。
+修改根目录主文件或参考后执行：
 
-细节落实到四种模式及各自验收：概括改写后复核原句映射，代码两列分别解释语法与实际作用，算法按真实依据组织推导。允许贯穿例子逐个演示难点，不按句长、篇幅比例或固定标题凑形式。
+```sh
+python3 scripts/sync_entries.py
+python3 scripts/sync_entries.py --check
+python3 -m unittest discover -s tests -v
+```
 
-所有模式在内部完成检查、修正问题并复核后再交付。学习输出不列检查项、通过状态、覆盖率统计或“全部通过”报告，也不默认附带审计文件；知识对比表、代码解释表和必要的样例推演照常保留。
+`--check` 只读，入口缺失、被手改、参考过期或存在旧参考副本时返回非零。同步只改生成入口和 OpenCode 的生成参考目录；该参考目录中的过期 Markdown 会随源文件移除，其他目录不受影响。重复同步不重写未变化文件。
+
+自然表达原则改编自 X-math-paper-deai，已融入主文件，无需运行论文技能。示例资料与具体边界见 `references/examples.md`。实际试讲结果位于 `tests/trials/`，仅作为维护证据，不是学习正文中的检查报告。
